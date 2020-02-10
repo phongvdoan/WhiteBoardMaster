@@ -60,13 +60,18 @@ public class ApplicationUserController {
     @PostMapping("/user/register")
     public RedirectView register(HttpServletRequest request, String username, String password, String firstName, String lastName) {
 
+        // checks for unique username
+        if (userRepository.findByUserName(username.toLowerCase()) != null) {
+            return new RedirectView("/login");
+        }
+
         // create user and add to database
-        ApplicationUser newUser = new ApplicationUser(username, passwordEncoder.encode(password), firstName, lastName);
+        ApplicationUser newUser = new ApplicationUser(username.toLowerCase(), passwordEncoder.encode(password), firstName, lastName);
         userRepository.save(newUser);
 
         // auto-login feature after creating account
         try {
-            request.login(username, password);
+            request.login(username.toLowerCase(), password);
         } catch (ServletException e) {
             e.printStackTrace();
         }
